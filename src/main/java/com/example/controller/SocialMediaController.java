@@ -1,17 +1,24 @@
 package com.example.controller;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.entity.Account;
 import com.example.entity.Message;
 import com.example.service.AccountService;
 import com.example.service.MessageService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Optional;
-
 import com.fasterxml.jackson.databind.JsonNode;  // Used for navigating and extracting data from JSON trees
 import com.fasterxml.jackson.databind.ObjectMapper;  // Used for parsing JSON data and converting it to/from Java objects
 
@@ -79,7 +86,6 @@ public class SocialMediaController {
             //return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Message not found");
             // To meet test expectations, return HTTP 200 with an empty body
             return ResponseEntity.ok().body("");  // Returning an empty string as the body
-            /*Normally, HTTP 404 is appropriate as it correctly indicates that the requested resource was not found. I disagree with this implementation */
         }
     }
 
@@ -101,6 +107,14 @@ public class SocialMediaController {
     @PatchMapping("/messages/{messageId}")
     public ResponseEntity<?> updateMessage(@PathVariable Integer messageId, @RequestBody String jsonBody) {
         try {
+
+            /*Using ObjectMapper and JsonNode allows the controller method to extract specific data from the incoming JSON request body (jsonBody). 
+            In this case, it's extracting the new message text to be updated in the message identified by messageId. 
+            Once the new message text is extracted, it can be passed to the messageService for further processing, 
+            such as updating the message in the database. */
+            /*Passing the raw JSON body to the service layer tightly couples the controller to the specific JSON structure of the request. 
+            If the JSON structure changes in the future, I would need to update both the controller and the service layer, 
+            leading to maintenance overhead and potential bugs. */
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(jsonBody);
             String newMessageText = jsonNode.get("messageText").asText();
